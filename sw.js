@@ -1,6 +1,6 @@
 // Simple offline support: the app shell loads even with no signal.
 // Bump VERSION whenever you change index.html so phones pick up the update.
-const VERSION = "daily-dash-v1";
+const VERSION = "daily-dash-v2";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon.svg", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", e => {

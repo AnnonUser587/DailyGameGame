@@ -566,14 +566,27 @@ function handleUrlParams(){
   if (changed) history.replaceState(null, "", baseUrl());
 }
 
+/* ---------- Opening games ---------- */
+// Must run directly inside the tap so iOS treats it as a user action.
+// If the browser blocks the new tab, go to the game in this tab instead, so Play always takes you there.
+function launch(url){
+  let w = null;
+  try { w = window.open(url, "_blank"); } catch {}
+  if (w) { try { w.opener = null; } catch {} }
+  else location.href = url;
+}
+
 /* ---------- Events ---------- */
 document.addEventListener("click", e => {
   const t = e.target.closest("[data-play],[data-fav],[data-more],[data-chip],[data-close],[data-emoji],#emptyAdd");
   if (!t) return;
-  if (t.dataset.play){ // let the link open, then mark played
-    const id = t.dataset.play;
-    setTimeout(() => { markPlayed(id, true); if (t.id==="slotPlay") closeSheets(); }, 60);
+  if (t.dataset.play){ // open the game ourselves, then mark it played
+    e.preventDefault();
+    const id = t.dataset.play, g = getGame(id);
+    if (g) launch(g.url);
     rerolledAway = [];
+    if (t.id==="slotPlay") closeSheets();
+    setTimeout(() => markPlayed(id, true), 60);
     return;
   }
   e.preventDefault();
