@@ -1,4 +1,4 @@
-# 🎲 Daily Dash
+# 🎲 DailyGameGame
 
 All your daily games in one place. Tap a game to play it in a new tab, or hit **Random** to get one you haven't played yet today.
 
@@ -21,7 +21,7 @@ All data is stored on your device (localStorage). No accounts, no server.
 
 ## Put it on GitHub Pages (free)
 
-1. Create a new repository on GitHub (for example `daily-dash`).
+1. Create a new repository on GitHub (for example `dailygamegame`).
 2. Upload **all** these files, keeping the `icons` folder:
    ```
    index.html
@@ -31,7 +31,7 @@ All data is stored on your device (localStorage). No accounts, no server.
    README.md
    ```
 3. In the repo go to **Settings → Pages**. Under *Source* pick **Deploy from a branch**, then branch **main** and folder **/ (root)**, then **Save**.
-4. After about a minute your site is live at `https://YOUR-USERNAME.github.io/daily-dash/`.
+4. After about a minute your site is live at `https://YOUR-USERNAME.github.io/dailygamegame/`.
 
 ## Install on iPhone
 
@@ -47,9 +47,9 @@ Edit the `BUILTIN` list near the top of the `<script>` in `index.html`:
 
 `tag` can be: Words, Puzzle, Numbers, Geography, Guessing, Skill, Trivia, Other.
 
-After changing files, bump `VERSION` in `sw.js` (e.g. `daily-dash-v2`) so installed phones pick up the update.
+After changing files, bump `VERSION` in `sw.js` (e.g. `dailygamegame-v5`) so installed phones pick up the update.
 
 ## Handy links
 
-- `…/daily-dash/?random` opens straight into a random roll (good for a home-screen shortcut)
-- `…/daily-dash/?add=https://somegame.com&name=Some%20Game` opens the add form pre-filled
+- `…/dailygamegame/?random` opens straight into a random roll (good for a home-screen shortcut)
+- `…/dailygamegame/?add=https://somegame.com&name=Some%20Game` opens the add form pre-filled
