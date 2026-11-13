@@ -16,7 +16,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180.png?v=3">
+<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png?v=3">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png?v=3">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120.png?v=3">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3">
 <style>
 :root{
   --bg:#fff6e5; --paper:#fffdf7; --ink:#14121a; --muted:#6b6577; --line:#14121a;
@@ -199,7 +204,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--violet);outline-off
   .side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:0 10px 28px 4px;scrollbar-width:none}
   .side::-webkit-scrollbar{display:none}
   .desk{display:block}
-  .fab,.chips,.install{display:none!important}
+  .fab,.toolbar .chips,.install{display:none!important}
   header{padding-top:30px}
   .logo{font-size:25px}
   .statsTop{flex-direction:column;gap:8px}
@@ -235,6 +240,29 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--violet);outline-off
   .toast{bottom:32px}
   .list button:hover{background:var(--soft)}
 }
+
+/* ---------- Add sheet: tabs + catalog ---------- */
+#sheetEdit{max-height:92dvh}
+.tabs{display:flex;gap:6px;padding:4px;border:var(--edge);border-radius:14px;background:var(--bg);margin-bottom:12px}
+.tabs button{flex:1;padding:10px 6px;border-radius:10px;font-weight:800;font-size:15px;color:var(--muted)}
+.tabs button.on{background:var(--yellow);color:#14121a;box-shadow:2px 2px 0 var(--ink);border:2px solid var(--ink)}
+.catTop{position:sticky;top:-10px;z-index:2;background:var(--paper);padding:2px 0 2px;margin:0 -2px}
+.catTop .chips{padding:10px 2px 2px}
+.catTop .note{margin:6px 2px 4px}
+.catList{display:flex;flex-direction:column;gap:10px;padding:4px 2px 4px}
+.catRow{display:flex;align-items:center;gap:10px;padding:10px;border:2px solid var(--ink);border-radius:14px;background:var(--bg)}
+.catRow .ico{flex:none;width:44px;height:44px;border-radius:12px;border:2px solid var(--ink);display:grid;place-items:center;font-size:23px}
+.catRow .ct{flex:1;min-width:0}
+.catRow .cn{font-weight:800;font-size:16px;letter-spacing:-.01em;line-height:1.15}
+.catRow .cb{font-size:13px;color:var(--muted);font-weight:500;line-height:1.3;margin-top:2px}
+.catRow .try{flex:none;font-size:13px;font-weight:700;color:var(--muted);padding:8px 4px}
+.addBtn{flex:none;min-width:78px;padding:8px 10px;border-radius:10px;font-weight:800;font-size:14px;background:var(--yellow);color:#14121a;
+  border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.addBtn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--ink)}
+.addBtn.on{background:var(--mint)}
+@media (max-width:360px){.catRow .try{display:none}}
+@media (min-width:700px){#sheetEdit{width:min(600px,94vw);max-height:86vh}}
+@media (hover:hover){.catRow .try:hover{color:var(--text)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -315,6 +343,19 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--violet);outline-off
 <div class="sheet" id="sheetEdit" role="dialog" aria-label="Add game">
   <div class="grab"></div>
   <h3 id="editTitle">Add a daily game</h3>
+  <div class="tabs" id="addTabs">
+    <button type="button" data-tab="browse" class="on">🔍 Browse games</button>
+    <button type="button" data-tab="custom">🔗 Add a link</button>
+  </div>
+  <div id="paneBrowse">
+    <div class="catTop">
+      <input class="in" id="catQ" type="search" placeholder="Search the game list" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="chips" id="catChips"></div>
+      <div class="note" id="catCount"></div>
+    </div>
+    <div class="catList" id="catList"></div>
+  </div>
+  <div id="paneCustom" class="hidden">
   <form id="editForm" autocomplete="off">
     <label class="f" for="fUrl">Link</label>
     <input class="in" id="fUrl" type="url" inputmode="url" placeholder="https://example.com" required autocapitalize="off">
@@ -327,7 +368,8 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--violet);outline-off
     <button class="btn pri" type="submit" id="saveBtn">Save game</button>
   </form>
   <button class="btn danger hidden" id="delBtn">Delete game</button>
-  <button class="btn" data-close>Cancel</button>
+  </div>
+  <button class="btn" data-close id="editClose">Done</button>
 </div>
 
 <!-- Game options sheet -->
@@ -391,7 +433,7 @@ const BUILTIN = [
   {id:"fermi",    name:"Fermi",           url:"https://fermi.gg/",                               emoji:"🧮", tag:"Numbers"},
   {id:"halfsies", name:"Halfsies",        url:"https://halfsies.dev/",                           emoji:"🌗", tag:"Guessing"},
 ];
-const TAGS = ["Words","Puzzle","Numbers","Geography","Guessing","Skill","Trivia","Other"];
+const TAGS = ["Words","Puzzle","Numbers","Geography","Guessing","Skill","Trivia","History","Colors","Movies & TV","Music","Gaming","Sports","Nature","Other"];
 const EMOJIS = ["🎮","🟩","🧩","🔢","🗺️","🎨","⏱️","🧠","🎯","🏆","🔤","🌍","🎲","💡","🃏","🎵","🎬","⚽","🐶","🍔","💰","⭐","🔥","❓"];
 const TINTS = ["#ff8a65","#ffd23f","#7ee2a8","#7cc4ff","#c3a6ff","#ff9fd0","#c8f169","#ffb35c","#6fe0d6","#ffa8a8"];
 
@@ -468,7 +510,7 @@ function cardHTML(g){
     <a class="play" href="${esc(g.url)}" target="_blank" rel="noopener" data-play="${esc(g.id)}" title="Play ${esc(g.name)}">
       <div class="ico">${esc(g.emoji||"🎮")}</div>
       <div class="name">${esc(g.name)}</div>
-      <div class="meta"><span class="host">${esc(hostOf(g.url))}</span>${g.custom?'<span class="badge">Yours</span>':""}</div>
+      <div class="meta"><span class="host">${esc(hostOf(g.url))}</span>${g.custom&&!g.catalog?'<span class="badge">Yours</span>':""}</div>
       ${played?'<span class="stamp">Done</span>':""}
     </a>
     <div class="acts">
@@ -594,8 +636,11 @@ function openEdit(g, prefill){
   pickedEmoji = g?.emoji || "🎮";
   $("#emojiPick").innerHTML = EMOJIS.map(e => `<button type="button" class="${e===pickedEmoji?"on":""}" data-emoji="${e}">${e}</button>`).join("");
   $("#delBtn").classList.toggle("hidden", !(g && g.custom));
+  $("#addTabs").classList.toggle("hidden", !!g);
+  $("#editClose").textContent = g ? "Cancel" : "Done";
+  setAddTab(g || prefill ? "custom" : "browse");
   openSheet("#sheetEdit");
-  if (!g) setTimeout(()=>$("#fUrl").focus(), 350);
+  if (prefill && !g) setTimeout(()=>$("#fUrl").focus(), 350);
 }
 
 let current = null;
@@ -663,7 +708,7 @@ function addCustom(list){
     const url = safeUrl(g.url); if (!url) continue;
     const k = url.replace(/\/+$/,"").toLowerCase(); if (known.has(k)) continue; known.add(k);
     S.custom.push({id:"c_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6), name:String(g.name||nameFromUrl(url)).slice(0,40),
-      url, emoji:EMOJIS.includes(g.emoji)?g.emoji:(g.emoji?String(g.emoji).slice(0,4):"🎮"), tag:TAGS.includes(g.tag)?g.tag:"Other", custom:true});
+      url, emoji:EMOJIS.includes(g.emoji)?g.emoji:(g.emoji?String(g.emoji).slice(0,4):"🎮"), tag:TAGS.includes(g.tag)?g.tag:"Other", custom:true, ...(g.catalog&&/^cat_[a-z0-9]+$/.test(g.id||"")?{id:g.id,catalog:true}:{})});
     added++;
   }
   save(); render(); return added;
@@ -684,6 +729,151 @@ function handleUrlParams(){
   if (changed) history.replaceState(null, "", baseUrl());
 }
 
+/* ---------- Game catalog (Browse in the + menu) ---------- */
+// like:true = similar to the starter games (estimating, skill, score-chasing)
+const CATALOG = [
+  // Like your games
+  {n:"More/Less", u:"https://lessgames.com/moreless", e:"⚖️", t:"Guessing", b:"Pick which of two things has the bigger number. One miss ends your run.", like:1},
+  {n:"Housle", u:"https://housle.house/", e:"🏠", t:"Guessing", b:"Guess a house's price from its photos.", like:1},
+  {n:"Estimate Me", u:"https://estimate-me.aukspot.com/", e:"🫙", t:"Guessing", b:"How many things are in the jar? Three tries.", like:1},
+  {n:"Auctimate", u:"https://guessdash.com/auctimate", e:"🔨", t:"Guessing", b:"Guess what government surplus auction items sold for.", like:1},
+  {n:"Weighsies", u:"https://www.weighsies.dev/", e:"🏋️", t:"Guessing", b:"How many of one thing balance another on a scale?", like:1},
+  {n:"Magnitudle", u:"https://magnitudle.com/size-it-up", e:"📏", t:"Skill", b:"Resize a silhouette to its true real-world scale.", like:1},
+  {n:"Minigolfle", u:"https://minigolfle.com/", e:"🏌️", t:"Skill", b:"Three mini golf holes. Fewest shots wins.", like:1},
+  {n:"putt.day", u:"https://putt.day/", e:"⛳", t:"Skill", b:"One 3D mini golf hole a day. Same course for everyone.", like:1},
+  {n:"Cutle", u:"https://pfiffel.com/cutle", e:"✂️", t:"Skill", b:"Make one cut that splits a shape exactly in half.", like:1},
+  {n:"Angle", u:"https://angle.wtf/", e:"📐", t:"Skill", b:"Guess the angle in degrees in four tries.", like:1},
+  {n:"Centroid", u:"https://centroidgame.com/", e:"🎯", t:"Skill", b:"Tap the center of mass of a shape.", like:1},
+  {n:"Stackdle", u:"https://stackdle.dev/", e:"🧱", t:"Skill", b:"Stack 20 odd-shaped pieces into the tallest tower.", like:1},
+  {n:"Squishy Billiards", u:"https://squishybilliards.com/", e:"🎱", t:"Skill", b:"Clear the gooey blobs in the fewest shots.", like:1},
+  {n:"The Split", u:"https://www.timecube.in/", e:"🗳️", t:"Guessing", b:"Answer yes or no, then guess what % of players said yes.", like:1},
+  {n:"MapTap", u:"https://maptap.gg/", e:"📍", t:"Geography", b:"Tap where world cities are on the map. Five rounds.", like:1},
+  {n:"Numblino", u:"https://numblino.com/", e:"🔢", t:"Numbers", b:"Estimate the numbers behind trivia facts.", like:1},
+  {n:"Capitalibrate", u:"https://guessdash.com/capitalibrate", e:"🧭", t:"Geography", b:"Guess the direction and distance between two capitals.", like:1},
+  {n:"Gauntle", u:"https://gauntle.com/", e:"🏃", t:"Puzzle", b:"11 mini-puzzles back to back. Fastest time wins.", like:1},
+  {n:"RNGdle", u:"https://www.rngdle.com/", e:"🎰", t:"Other", b:"One random number roll a day. Pure luck.", like:1},
+  {n:"Scrandle", u:"https://scrandle.com/", e:"🌭", t:"Guessing", b:"Pick the stadium food fans rated higher. Build a streak.", like:1},
+  {n:"Hexcodle", u:"https://www.hexcodle.com/", e:"#️⃣", t:"Colors", b:"Crack the day's hidden hex color code.", like:1},
+  {n:"Colorfle", u:"https://colorfle.com/", e:"🧪", t:"Colors", b:"Find the three colors that mix into the swatch.", like:1},
+  {n:"Daily Unfold", u:"https://www.dailyunfold.com/", e:"📄", t:"Puzzle", b:"Predict where punched holes land when the paper unfolds.", like:1},
+
+  // Guessing
+  {n:"Majority Game", u:"https://www.majoritygame.com/", e:"👥", t:"Guessing", b:"Type the answer you think most people gave."},
+  {n:"Crowdle", u:"https://pzlgames.com/games/crowdle/", e:"📊", t:"Guessing", b:"Name the four most popular survey answers."},
+  {n:"Feudle", u:"https://feudlegame.com/", e:"🗣️", t:"Guessing", b:"Family Feud style: guess the top answers."},
+  {n:"Thingdle", u:"https://thingdle.app/thingdle", e:"📦", t:"Guessing", b:"Guess the everyday object from size and weight clues."},
+  {n:"Cropple", u:"https://cropple.app/", e:"🔍", t:"Guessing", b:"Guess the object from an extreme close-up."},
+  {n:"Cardle", u:"https://www.playcardle.com/", e:"🚗", t:"Guessing", b:"Name the car's make, model and year from a cropped photo."},
+  {n:"Planespottle", u:"https://planespottle.net/", e:"🛩️", t:"Guessing", b:"Identify the plane and airline from a partial photo."},
+
+  // Words
+  {n:"Connections", u:"https://www.nytimes.com/games/connections", e:"🟪", t:"Words", b:"Sort 16 words into four secret groups."},
+  {n:"Strands", u:"https://www.nytimes.com/games/strands", e:"🧵", t:"Words", b:"Find the themed words hiding in a letter grid."},
+  {n:"The Mini", u:"https://www.nytimes.com/crosswords/game/mini", e:"✏️", t:"Words", b:"NYT's tiny daily crossword. Takes about a minute."},
+  {n:"Quordle", u:"https://www.merriam-webster.com/games/quordle/", e:"🟨", t:"Words", b:"Four Wordles at once, nine guesses."},
+  {n:"Waffle", u:"https://wafflegame.net/daily", e:"🧇", t:"Words", b:"Swap letters to fix the word grid."},
+  {n:"Contexto", u:"https://contexto.me/", e:"🧠", t:"Words", b:"Find the secret word using how close in meaning your guesses are."},
+  {n:"Conexo", u:"https://conexo.ws/en", e:"🔗", t:"Words", b:"Group 16 words into four connected sets."},
+  {n:"Bracket City", u:"https://www.theatlantic.com/games/bracket-city/", e:"🏗️", t:"Words", b:"Solve nested clues from the inside out."},
+  {n:"Minute Cryptic", u:"https://www.minutecryptic.com/", e:"🕵️", t:"Words", b:"One cryptic crossword clue a day."},
+  {n:"CHN LNK", u:"https://thechnlnk.com/", e:"⛓️", t:"Words", b:"Uncover a chain of linked words letter by letter."},
+  {n:"Squaredle", u:"https://squaredle.app/", e:"🔠", t:"Words", b:"Find every word in a twisty letter grid."},
+  {n:"Crosswordle", u:"https://crosswordle.com/", e:"❎", t:"Words", b:"Work backwards from the colors to the guesses."},
+
+  // Puzzle & numbers
+  {n:"Pips", u:"https://www.nytimes.com/games/pips", e:"🎲", t:"Puzzle", b:"Place dominoes so every region's rule works."},
+  {n:"Clues by Sam", u:"https://cluesbysam.com/", e:"🔦", t:"Puzzle", b:"Figure out who's innocent and who's a criminal."},
+  {n:"Murdle", u:"https://murdle.com/", e:"🔎", t:"Puzzle", b:"Logic mystery: find the killer, weapon and place."},
+  {n:"enclose.horse", u:"https://enclose.horse/", e:"🐴", t:"Puzzle", b:"Use limited walls to trap the horse."},
+  {n:"Rotaboxes", u:"https://rotaboxes.com/", e:"🔄", t:"Puzzle", b:"Rotate the tiles to fix a scrambled photo."},
+  {n:"Tessera", u:"https://tessera.day/", e:"🪟", t:"Colors", b:"Color in a stained glass logic puzzle."},
+  {n:"Puzzmo", u:"https://www.puzzmo.com/today", e:"🧩", t:"Puzzle", b:"A daily bundle of fresh puzzle games."},
+  {n:"Chess.com Daily Puzzle", u:"https://www.chess.com/daily-chess-puzzle", e:"♟️", t:"Puzzle", b:"Find the best move in today's position."},
+  {n:"Lichess Daily Puzzle", u:"https://lichess.org/training/daily", e:"♞", t:"Puzzle", b:"Free daily chess puzzle, no account needed."},
+  {n:"Nerdle", u:"https://nerdlegame.com/", e:"🟰", t:"Numbers", b:"Wordle, but it's a math equation."},
+  {n:"Mathler", u:"https://www.mathler.com/", e:"➗", t:"Numbers", b:"Find the equation that equals today's number."},
+  {n:"Sumplete", u:"https://sumplete.com/", e:"➕", t:"Numbers", b:"Cross out numbers until every row and column adds up."},
+
+  // Geography
+  {n:"Globle", u:"https://globle-game.com/game", e:"🌍", t:"Geography", b:"Find the mystery country. Closer guesses glow hotter."},
+  {n:"Worldle", u:"https://worldle.teuteuf.fr/", e:"🗾", t:"Geography", b:"Name the country from its outline."},
+  {n:"Travle", u:"https://travle.earth/", e:"✈️", t:"Geography", b:"Connect two countries through their neighbors."},
+  {n:"Flagle", u:"https://flagle-game.com/", e:"🚩", t:"Geography", b:"Reveal the hidden flag one guess at a time."},
+  {n:"Countryle", u:"https://www.countryle.com/", e:"🌐", t:"Geography", b:"Guess the country from population, climate and direction hints."},
+  {n:"GeoGrid", u:"https://www.geogridgame.com/", e:"🔲", t:"Geography", b:"Fill a 3x3 grid with countries that fit both clues."},
+  {n:"Tradle", u:"https://oec.world/en/games/tradle", e:"🚢", t:"Geography", b:"Guess the country from what it exports."},
+  {n:"Airport Guessr", u:"https://planespottle.net/airportguessr", e:"🛫", t:"Geography", b:"Name the airport from a satellite photo."},
+  {n:"Foodguessr", u:"https://foodguessr.com/", e:"🍜", t:"Geography", b:"Guess where a dish comes from."},
+
+  // History & trivia
+  {n:"TimeGuessr", u:"https://timeguessr.com/", e:"🕰️", t:"History", b:"Guess where and when an old photo was taken."},
+  {n:"Chronophoto", u:"https://www.chronophoto.app/", e:"📸", t:"History", b:"Guess the year a photo was taken."},
+  {n:"Catfishing", u:"https://catfishing.net/", e:"🐟", t:"Trivia", b:"Guess the Wikipedia article from its categories."},
+  {n:"Thrice", u:"https://thrice.geekswhodrink.com/", e:"3️⃣", t:"Trivia", b:"Trivia with up to three clues per question."},
+  {n:"Krillion", u:"https://krillion.io/", e:"⏲️", t:"Trivia", b:"Seven prompts, 25 seconds each. Rare answers score more."},
+  {n:"Rankle", u:"https://www.rankle.app/", e:"🥇", t:"Trivia", b:"Put six things in the right order."},
+
+  // Movies, music, gaming
+  {n:"Framed", u:"https://framed.wtf/", e:"🎬", t:"Movies & TV", b:"Name the movie from a single frame."},
+  {n:"Actorle", u:"https://actorle.com/", e:"🎭", t:"Movies & TV", b:"Guess the actor from their movies."},
+  {n:"Bandle", u:"https://bandle.app/", e:"🥁", t:"Music", b:"Name the song as instruments get added one by one."},
+  {n:"Songless", u:"https://lessgames.com/songless", e:"🎵", t:"Music", b:"Name the song from a tiny audio clip."},
+  {n:"Spotle", u:"https://spotle.io/", e:"🎤", t:"Music", b:"Guess the mystery artist from Spotify's biggest names."},
+  {n:"GuessThe.Game", u:"https://guessthe.game/", e:"🕹️", t:"Gaming", b:"Name the video game from screenshots."},
+  {n:"PokeDoku", u:"https://pokedoku.com/", e:"🔴", t:"Gaming", b:"Fill a 3x3 grid with Pokémon that fit both clues."},
+
+  // Sports & nature
+  {n:"Immaculate Grid", u:"https://www.sports-reference.com/immaculate-grid/", e:"⚾", t:"Sports", b:"Name baseball players who fit both clues."},
+  {n:"Poeltl", u:"https://poeltl.nbpa.com/", e:"🏀", t:"Sports", b:"Guess the mystery NBA player."},
+  {n:"HoopGrids", u:"https://www.hoopgrids.com/", e:"⛹️", t:"Sports", b:"Fill a grid with NBA players."},
+  {n:"Metazooa", u:"https://metazooa.com/play/game", e:"🦓", t:"Nature", b:"Find the mystery animal using the tree of life."},
+  {n:"Metaflora", u:"https://flora.metazooa.com/play/game", e:"🌿", t:"Nature", b:"Find the mystery plant using the tree of life."},
+  {n:"Doggle", u:"https://doggle.app/", e:"🐶", t:"Nature", b:"Guess the dog breed from a photo."},
+].map(g => ({...g, id:"cat_"+g.n.toLowerCase().replace(/[^a-z0-9]+/g,"")}));
+
+const normUrl = u => String(u).replace(/^https?:\/\/(www\.)?/i,"").replace(/[?#].*$/,"").replace(/\/+$/,"").toLowerCase();
+const isInList = c => allGames(true).some(g => g.id===c.id || normUrl(g.url)===normUrl(c.u));
+let catFilter = "★ Like yours", catQ = "";
+
+function renderCatalog(){
+  const tags = [...new Set(CATALOG.map(c => c.t))];
+  const chips = ["★ Like yours","All",...tags];
+  $("#catChips").innerHTML = chips.map(c => `<button class="chip ${c===catFilter?"on":""}" data-catchip="${esc(c)}">${esc(c)}</button>`).join("");
+  const q = catQ.trim().toLowerCase();
+  const list = CATALOG.filter(c => (q ? (c.n+" "+c.b+" "+c.t+" "+c.u).toLowerCase().includes(q)
+    : catFilter==="All" ? true : catFilter==="★ Like yours" ? c.like : c.t===catFilter));
+  const added = CATALOG.filter(isInList).length;
+  $("#catCount").textContent = `${CATALOG.length} games · ${added} in your list`;
+  $("#catList").innerHTML = list.length ? list.map(c => {
+    const on = isInList(c);
+    return `<div class="catRow">
+      <div class="ico" style="background:${tint(c.id)}">${esc(c.e)}</div>
+      <div class="ct"><div class="cn">${esc(c.n)}</div><div class="cb">${esc(c.b)}</div></div>
+      <button class="try" data-try="${esc(c.u)}" aria-label="Try ${esc(c.n)}">Try ↗</button>
+      <button class="addBtn ${on?"on":""}" data-catadd="${esc(c.id)}">${on?"✓ Added":"+ Add"}</button>
+    </div>`; }).join("") : `<div class="empty">No games match. Try the <b>Add a link</b> tab.</div>`;
+}
+
+function toggleCatalog(id){
+  const c = CATALOG.find(x => x.id===id); if (!c) return;
+  if (isInList(c)){
+    const g = allGames(true).find(g => g.id===c.id || normUrl(g.url)===normUrl(c.u));
+    if (g && g.custom){ S.custom = S.custom.filter(x => x.id!==g.id); S.favs = S.favs.filter(x => x!==g.id); save(); render(); toast(`Removed ${c.n}`); }
+    else if (g){ toast(`${c.n} is a starter game. Hide it from its ⋯ menu`); }
+  } else {
+    S.custom.push({id:c.id, name:c.n, url:c.u, emoji:c.e, tag:c.t, custom:true, catalog:true});
+    save(); render(); toast(`Added ${c.n} 🎉`);
+  }
+  renderCatalog();
+}
+
+function setAddTab(tab){
+  document.querySelectorAll("#addTabs button").forEach(b => b.classList.toggle("on", b.dataset.tab===tab));
+  $("#paneBrowse").classList.toggle("hidden", tab!=="browse");
+  $("#paneCustom").classList.toggle("hidden", tab!=="custom");
+  if (tab==="browse") renderCatalog();
+}
+
 /* ---------- Opening games ---------- */
 // Must run directly inside the tap so iOS treats it as a user action.
 // If the browser blocks the new tab, go to the game in this tab instead, so Play always takes you there.
@@ -696,7 +886,7 @@ function launch(url){
 
 /* ---------- Events ---------- */
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-play],[data-fav],[data-more],[data-chip],[data-close],[data-emoji],#emptyAdd");
+  const t = e.target.closest("[data-play],[data-fav],[data-more],[data-chip],[data-close],[data-emoji],[data-catadd],[data-catchip],[data-try],[data-tab],#emptyAdd");
   if (!t) return;
   if (t.dataset.play){ // open the game ourselves, then mark it played
     e.preventDefault();
@@ -709,6 +899,10 @@ document.addEventListener("click", e => {
   }
   e.preventDefault();
   if (t.dataset.fav){ const id=t.dataset.fav; S.favs = S.favs.includes(id) ? S.favs.filter(x=>x!==id) : [...S.favs,id]; save(); render(); }
+  else if (t.dataset.catadd) toggleCatalog(t.dataset.catadd);
+  else if (t.dataset.catchip){ catFilter = t.dataset.catchip; catQ = ""; $("#catQ").value = ""; renderCatalog(); $("#catList").scrollTop = 0; }
+  else if (t.dataset.try) launch(t.dataset.try);
+  else if (t.dataset.tab){ setAddTab(t.dataset.tab); if (t.dataset.tab==="custom") setTimeout(()=>$("#fUrl").focus(), 50); }
   else if (t.dataset.more) openGame(t.dataset.more);
   else if (t.dataset.chip){ S.filter = t.dataset.chip; render(); }
   else if (t.hasAttribute("data-close")) closeSheets();
@@ -744,6 +938,7 @@ document.querySelectorAll(".sheet").forEach(sh => {
 });
 
 $("#q").addEventListener("input", e => { S.q = e.target.value; render(); });
+$("#catQ").addEventListener("input", e => { catQ = e.target.value; renderCatalog(); });
 $("#fab").onclick = $("#sideAdd").onclick = () => openEdit(null);
 $("#menuBtn").onclick = () => openSheet("#sheetMenu");
 $("#randomBtn").onclick = () => { rolled=null; rerolledAway=[]; $("#favOnly").checked = S.favOnly; openSheet("#sheetRandom"); rollRandom(); };
@@ -797,7 +992,7 @@ $("#mReset").onclick = () => { if (confirm("Clear today's played games?")){ S.pl
 $("#mHidden").onclick = () => { S.showHidden = !S.showHidden; render(); closeSheets(); toast(S.showHidden ? "Showing hidden games (dashed). Tap ⋯ → Unhide" : "Hidden games hidden again"); };
 $("#mShareList").onclick = () => {
   if (!S.custom.length){ toast("Add some games first with +"); return; }
-  const list = S.custom.map(({name,url,emoji,tag}) => ({name,url,emoji,tag}));
+  const list = S.custom.map(({id,name,url,emoji,tag,catalog}) => (catalog?{id,name,url,emoji,tag,catalog}:{name,url,emoji,tag}));
   shareText("My daily games", baseUrl()+"?import="+b64e(list));
 };
 $("#mExport").onclick = () => {

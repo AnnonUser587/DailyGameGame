@@ -1,7 +1,7 @@
 // Simple offline support: the app shell loads even with no signal.
 // Bump VERSION whenever you change index.html so phones pick up the update.
-const VERSION = "dailygamegame-v4";
-const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon.svg", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png"];
+const VERSION = "dailygamegame-v6";
+const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon.svg", "apple-touch-icon.png", "apple-touch-icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

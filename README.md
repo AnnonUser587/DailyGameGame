@@ -27,6 +27,8 @@ All data is stored on your device (localStorage). No accounts, no server.
    index.html
    manifest.webmanifest
    sw.js
+   apple-touch-icon*.png   (the iPhone home-screen icons, keep them next to index.html)
+   favicon-32.png
    icons/
    README.md
    ```
@@ -35,7 +37,9 @@ All data is stored on your device (localStorage). No accounts, no server.
 
 ## Install on iPhone
 
-Open the link in **Safari**, tap **Share** (the square with an arrow), then **Add to Home Screen**.
+Open the link in **Safari**, tap **Share** (the square with an arrow), then **Add to Home Screen**. You should see the dice icon in the preview before you tap **Add**.
+
+If you see a screenshot or a letter instead of the icon, delete the old home-screen shortcut, close Safari completely, reopen the site and add it again. iPhones cache icons aggressively.
 
 ## Add more built-in games
 
@@ -47,7 +51,7 @@ Edit the `BUILTIN` list near the top of the `<script>` in `index.html`:
 
 `tag` can be: Words, Puzzle, Numbers, Geography, Guessing, Skill, Trivia, Other.
 
-After changing files, bump `VERSION` in `sw.js` (e.g. `dailygamegame-v5`) so installed phones pick up the update.
+After changing files, bump `VERSION` in `sw.js` (e.g. `dailygamegame-v6`) so installed phones pick up the update.
 
 ## Handy links
 
