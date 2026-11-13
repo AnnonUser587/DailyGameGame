@@ -160,6 +160,12 @@ label.f{display:block;font-size:13px;font-weight:800;margin:14px 0 6px;text-tran
 .btn.grad{background:var(--mint);color:#14121a;font-size:21px;padding:16px}
 .btn.danger{color:#e5484d}
 .note{font-size:13px;color:var(--muted);margin:8px 0;font-weight:600}
+.about{font-size:15px;line-height:1.5;font-weight:500}
+.about h4{margin:16px 0 4px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.about h4:first-child{margin-top:0}
+.about p{margin:0}
+.about a{color:var(--violet);font-weight:700;word-break:break-all}
+#sheetAbout{max-height:90dvh}
 .list{display:flex;flex-direction:column;margin-top:6px;border:var(--edge);border-radius:14px;overflow:hidden}
 .list button,.list a{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:2px solid color-mix(in srgb,var(--text) 12%,transparent);text-align:left;width:100%;text-decoration:none;font-weight:600}
 .list button:last-child{border-bottom:0}
@@ -400,9 +406,37 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--violet);outline-off
     <button id="mExport">💾 <span>Export backup (JSON)</span></button>
     <button id="mImport">📥 <span>Import backup</span></button>
     <button id="mInstall">📲 <span>How to install on iPhone</span></button>
+    <button id="mAbout">ℹ️ <span>About &amp; disclaimer</span></button>
   </div>
   <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-  <p class="note">Everything is saved on this device only. Daily progress resets at midnight your local time.</p>
+  <p class="note">Everything is saved on this device only. Daily progress resets at midnight your local time. DailyGameGame is an independent launcher and isn't affiliated with any of the games it links to.</p>
+  <button class="btn" data-close>Close</button>
+</div>
+
+<!-- About sheet -->
+<div class="sheet" id="sheetAbout" role="dialog" aria-label="About and disclaimer">
+  <div class="grab"></div>
+  <h3>About &amp; disclaimer</h3>
+  <div class="about">
+    <h4>What this app is</h4>
+    <p>DailyGameGame is a free launcher for daily games. It keeps links to games made by other people in one place, so you can open them quickly, pick one at random and keep track of what you've played today. That's all it does.</p>
+
+    <h4>No affiliation</h4>
+    <p>DailyGameGame is an independent fan project. It is <b>not affiliated with, endorsed by, sponsored by or connected to</b> any of the games or websites it links to, or the companies behind them (including The New York Times, Costco and every other game listed). All game names, logos and trademarks belong to their owners.</p>
+
+    <h4>The games themselves</h4>
+    <p>Every game opens on its own website. DailyGameGame doesn't host, copy, change or control any game. Each site has its own terms, privacy policy, ads and sign-ins, and DailyGameGame isn't responsible for their content, availability, or what happens on their pages. Games can change, move or shut down at any time.</p>
+
+    <h4>Your data</h4>
+    <p>There are no accounts, and DailyGameGame doesn't collect or send your data anywhere. Your game list, favorites, streak and daily progress are saved only in this browser on this device. Clearing your browser data erases them, so use <b>Export backup</b> in Settings to keep a copy.</p>
+
+    <h4>Want your game removed or added?</h4>
+    <p>If you make one of these games and want it removed, or know a great daily game that should be on the list, get in touch.</p>
+
+    <h4>Contact</h4>
+    <p>Comments, questions or concerns? Email <a href="mailto:jackemoseley@gmail.com?subject=DailyGameGame">jackemoseley@gmail.com</a>.</p>
+  </div>
+  <a class="btn pri" href="mailto:jackemoseley@gmail.com?subject=DailyGameGame">✉️ Email us</a>
   <button class="btn" data-close>Close</button>
 </div>
 
@@ -1015,6 +1049,7 @@ $("#importFile").onchange = async e => {
   }catch{ toast("Couldn't read that file"); }
   e.target.value = "";
 };
+$("#mAbout").onclick = () => openSheet("#sheetAbout");
 $("#mInstall").onclick = () => { closeSheets(); $("#installTip").classList.add("on"); window.scrollTo({top:0,behavior:"smooth"}); };
 
 // Install tip (iOS Safari, not yet installed)
